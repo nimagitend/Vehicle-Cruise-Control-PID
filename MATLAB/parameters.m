@@ -1,0 +1,7 @@
+m = 1500;        % Vehicle mass [kg]
+Cd = 0.30;       % Drag coefficient [-]
+A = 2.2;         % Frontal area [m^2]
+Crr = 0.01;      % Rolling resistance coefficient [-]
+r = 0.30;        % Wheel radius [m]
+rho = 1.225;     % Air density [kg/m^3]
+g = 9.81;        % Gravitational acceleration [m/s^2]
