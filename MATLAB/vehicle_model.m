@@ -3,29 +3,54 @@ clc;
 
 parameters;
 
-F_t = 600;
+v_ref = 100;
 
-tspan = [0 20];
-v0 = 0;
+tspan = [0 1000];
 
-model = @(t,v) vehicle_dynamics(t,v,rho,Cd,A,Crr,m,g,F_t);
-[t, v] = ode45(model,tspan,v0);
-v_kmh = v*3.6;
+x0 = [0; 0];
+
+v_ref_ms = v_ref / 3.6;
+
+Ki = 0.5;
+Kp = 20;
+
+model = @(t,x) vehicle_dynamics(t,x,rho,Cd,A,Crr,m,g,Kp,Ki,v_ref_ms);
+
+[t,x] = ode45(model,tspan,x0);
+
+v = x(:,1);
+
+v_kmh = v * 3.6;
+
 figure;
 
-plot(t, v_kmh, 'LineWidth', 1.5);
+plot(t,v_kmh,'LineWidth',1.5);
 
 grid on;
 
 xlabel('Time (s)');
 ylabel('Vehicle Speed (km/h)');
-title('Open-Loop Vehicle Response');
+title('PI Cruise Control Response');
 
-function dvdt = vehicle_dynamics(t, v, rho, Cd, A, Crr, m, g, F_t)
+function dxdt = vehicle_dynamics(t,x,rho,Cd,A,Crr,m,g,Kp,Ki,v_ref_ms)
+
+dxdt = zeros(2,1);
+
+v = x(1);
+integral_error = x(2);
+
+e = v_ref_ms - v;
+
+F_t = Kp * e + Ki * integral_error;
 
 F_drag = 1/2 * rho * Cd * A * v^2;
+
 F_rolling = Crr * m * g;
+
 F_resistance = F_drag + F_rolling;
-dvdt = (F_t - F_resistance) / m;
+
+dxdt(1) = (F_t - F_resistance) / m;
+
+dxdt(2) = e;
 
 end
